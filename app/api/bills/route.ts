@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server'
 
 import { computeShares } from '@/lib/calc'
-import { billFormSchema, toOptionalNumber } from '@/lib/validation/bill'
+import { BillFormSchema, billFormSchema, toOptionalNumber } from '@/lib/validation/bill'
 import { BillItem } from '@/types/bill'
 
 const parseJSONField = <T>(value: FormDataEntryValue | null): T | undefined => {
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const data = parsed.data
+  const data = parsed.data as BillFormSchema
 
   const shareInfo = computeShares({
     method: data.method,
