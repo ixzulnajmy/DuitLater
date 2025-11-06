@@ -4,11 +4,11 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 type BillPageProps = {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
-export default function BillSummaryPage({ params }: BillPageProps) {
-  const { id } = params
+export default async function BillSummaryPage({ params }: BillPageProps) {
+  const { id } = await params
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10">
       <header className="space-y-2">
