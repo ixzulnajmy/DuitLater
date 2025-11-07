@@ -1,18 +1,23 @@
 'use client'
 
-import { useState } from 'react'
-import { useAuth } from '@/lib/auth-context'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth-context'
 import { Camera, FileText, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default function NewBillPage() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
   const [mode, setMode] = useState<'choose' | 'scan' | 'manual'>('choose')
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/auth')
+    }
+  }, [loading, user, router])
+
   if (!user) {
-    router.push('/auth')
     return null
   }
 

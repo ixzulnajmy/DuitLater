@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'Manual input screen to create a new bill.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function NewBillPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:py-10">

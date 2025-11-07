@@ -2,7 +2,16 @@
 'use client'
 
 import * as React from 'react'
-import { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch, useFieldArray } from 'react-hook-form'
+import {
+  Control,
+  FieldErrors,
+  Path,
+  PathValue,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+  useFieldArray,
+} from 'react-hook-form'
 import { Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -37,7 +46,14 @@ export function ItemsTable<TFormValues extends { items: ItemField[] }>(props: It
     name: 'items' as never,
   })
 
-  const items = watch('items') as ItemField[]
+  type ItemValue = TFormValues['items'][number]
+
+  const watchedItems = watch('items' as Path<TFormValues>) as readonly ItemValue[] | undefined
+  const items = watchedItems ?? []
+  const itemErrors = errors?.items as unknown as FieldErrors<ItemValue>[] | undefined
+
+  const itemPath = <K extends Extract<keyof ItemValue, string>>(itemIndex: number, key: K) =>
+    `items.${itemIndex}.${key}` as Path<TFormValues>
 
   const subtotal = items?.reduce((acc, item) => {
     const price = typeof item.price === 'number' ? item.price : parseFloat(item.price || '0')
@@ -45,14 +61,19 @@ export function ItemsTable<TFormValues extends { items: ItemField[] }>(props: It
   }, 0) ?? 0
 
   const handleAssigneeToggle = (itemIndex: number, userId: string, checked: boolean) => {
-    const path = `items.${itemIndex}.assigneeIds` as any
-    const current = new Set((watch(path) as string[]) ?? [])
+    const assigneeKey = 'assigneeIds' as Extract<keyof ItemValue, string>
+    const typedPath = itemPath(itemIndex, assigneeKey)
+    const current = new Set((watch(typedPath) as string[]) ?? [])
     if (checked) {
       current.add(userId)
     } else {
       current.delete(userId)
     }
-    setValue(path, Array.from(current), { shouldDirty: true, shouldValidate: true })
+    const nextAssignees = Array.from(current) as unknown as PathValue<TFormValues, typeof typedPath>
+    setValue(typedPath, nextAssignees, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
   }
 
   return (
@@ -69,9 +90,10 @@ export function ItemsTable<TFormValues extends { items: ItemField[] }>(props: It
           </thead>
           <tbody className="bg-white">
             {fields.map((field, index) => {
-              const nameError = errors?.items?.[index]?.name as { message?: string } | undefined
-              const priceError = errors?.items?.[index]?.price as { message?: string } | undefined
-              const assigneeError = errors?.items?.[index]?.assigneeIds as { message?: string } | undefined
+              const currentError = itemErrors?.[index]
+              const nameError = currentError?.name as { message?: string } | undefined
+              const priceError = currentError?.price as { message?: string } | undefined
+              const assigneeError = currentError?.assigneeIds as { message?: string } | undefined
 
               return (
                 <tr key={field.id} className="border-t border-neutral-200 align-top">
@@ -81,7 +103,7 @@ export function ItemsTable<TFormValues extends { items: ItemField[] }>(props: It
                         placeholder="eg. Nasi lemak"
                         aria-label={`Item ${index + 1} name`}
                         disabled={disabled}
-                        {...register(`items.${index}.name` as const)}
+                        {...register(itemPath(index, 'name' as Extract<keyof ItemValue, string>))}
                       />
                       {nameError?.message ? (
                         <p className="text-xs text-red-500">{nameError.message}</p>
@@ -97,7 +119,7 @@ export function ItemsTable<TFormValues extends { items: ItemField[] }>(props: It
                         placeholder="0.00"
                         aria-label={`Item ${index + 1} price`}
                         disabled={disabled}
-                        {...register(`items.${index}.price` as const, {
+                        {...register(itemPath(index, 'price' as Extract<keyof ItemValue, string>), {
                           valueAsNumber: true,
                         })}
                       />
@@ -125,8 +147,8 @@ export function ItemsTable<TFormValues extends { items: ItemField[] }>(props: It
                               </span>
                               <Checkbox
                                 checked={checked && !disabledParticipant}
-                                onCheckedChange={(value) =>
-                                  handleAssigneeToggle(index, user.id, Boolean(value))
+                                onChange={(event) =>
+                                  handleAssigneeToggle(index, user.id, event.target.checked)
                                 }
                                 disabled={disabled || disabledParticipant}
                                 aria-label={`Toggle ${user.name} for item ${index + 1}`}
@@ -168,14 +190,15 @@ export function ItemsTable<TFormValues extends { items: ItemField[] }>(props: It
           <Button
             type="button"
             variant="outline"
-            onClick={() =>
-              append({
+            onClick={() => {
+              const newItem = {
                 id: `item_${Date.now()}`,
                 name: '',
                 price: 0,
                 assigneeIds: participantIds,
-              } as any)
-            }
+              } as ItemValue
+              append(newItem as never)
+            }}
             disabled={disabled}
             className="flex items-center gap-2"
           >

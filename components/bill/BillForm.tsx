@@ -91,9 +91,9 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
   }, [payerId, participantIds, setValue])
 
   React.useEffect(() => {
-    const currentItems = getValues('items')
+    const currentItems = (getValues('items') ?? []) as BillItem[]
     let hasChanged = false
-    const nextItems = currentItems.map((item) => {
+    const nextItems: BillItem[] = currentItems.map((item) => {
       const filtered = item.assigneeIds.filter((id) => participantIds.includes(id))
       if (filtered.length !== item.assigneeIds.length) {
         hasChanged = true
@@ -104,7 +104,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
       }
     })
     if (hasChanged) {
-      setValue('items', nextItems as any, { shouldValidate: true })
+      setValue('items', nextItems, { shouldValidate: true })
     }
   }, [participantIds, getValues, setValue, payerId])
 
@@ -136,7 +136,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
         const parsed = JSON.parse(stored) as Partial<FormSchema>
         reset({ ...defaultValues, ...parsed, receiptFile: null })
         setReceiptPreview(null)
-        toast.toast({ title: 'Draft restored', description: 'Picked up where you left off.' })
+        toast({ title: 'Draft restored', description: 'Picked up where you left off.' })
       }
     } catch (error) {
       console.error('Failed to restore draft', error)
@@ -158,7 +158,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
   const handleTagDelete = (tag: string) => {
     setValue(
       'tags',
-      (getValues('tags') ?? []).filter((existing) => existing !== tag),
+      (getValues('tags') ?? []).filter((existing: string) => existing !== tag),
       { shouldDirty: true, shouldValidate: true }
     )
   }
@@ -174,7 +174,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.toast({
+      toast({
         title: 'File too large',
         description: 'Please upload an image under 5MB.',
         variant: 'destructive',
@@ -225,7 +225,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
 
       const result = await response.json()
 
-      toast.toast({
+      toast({
         title: 'Bill created',
         description: `Net total ${formatCurrency(result.net ?? 0)}`,
         variant: 'success',
@@ -240,7 +240,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
       router.push(`/bill/${result.id ?? 'preview'}`)
     } catch (error) {
       console.error(error)
-      toast.toast({
+      toast({
         title: 'Something went wrong',
         description: 'Unable to save bill. Please try again.',
         variant: 'destructive',
@@ -251,13 +251,13 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
   }
 
   const handleSaveDraft = () => {
-    toast.toast({ title: 'Draft saved', description: 'Your bill is autosaved.' })
+    toast({ title: 'Draft saved', description: 'Your bill is autosaved.' })
   }
 
   const handleReset = () => {
     reset(defaultValues)
     setReceiptPreview(null)
-    toast.toast({ title: 'Form reset', description: 'Cleared inputs and draft.' })
+    toast({ title: 'Form reset', description: 'Cleared inputs and draft.' })
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem(DRAFT_KEY)
     }
@@ -279,6 +279,18 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
     tip: tipValue,
     discount: discountValue,
   })
+
+  const previewNet =
+    method === 'equal'
+      ? chargesSummary.net
+      : computeNetTotal({
+          method,
+          items,
+          serviceChargePct,
+          taxPct,
+          tip: tipValue,
+          discount: discountValue,
+        }).net
 
   return (
     <form
@@ -354,7 +366,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
                   render={({ field }) => (
                     <div className="space-y-3">
                       <div className="flex flex-wrap gap-2">
-                        {field.value?.map((id) => {
+                        {field.value?.map((id: string) => {
                           const user = users.find((u) => u.id === id)
                           return user ? <Badge key={id}>{user.name}</Badge> : null
                         })}
@@ -373,9 +385,10 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
                               </span>
                               <Checkbox
                                 checked={checked}
-                                onCheckedChange={(value) => {
+                                onChange={(event) => {
+                                  const isChecked = event.target.checked
                                   const next = new Set(field.value ?? [])
-                                  if (value) {
+                                  if (isChecked) {
                                     next.add(user.id)
                                   } else if (user.id !== payerId) {
                                     next.delete(user.id)
@@ -534,7 +547,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
               <div className="space-y-2">
                 <Label>Tags</Label>
                 <div className="flex flex-wrap gap-2">
-                  {watch('tags')?.map((tag) => (
+                  {watch('tags')?.map((tag: string) => (
                     <Badge key={tag} variant="outline" className="flex items-center gap-1">
                       #{tag}
                       <button
@@ -625,17 +638,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
         <div className="hidden space-y-3 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm lg:block">
           <div className="flex items-center justify-between text-sm text-neutral-600">
             <span>Net total</span>
-            <span className="text-lg font-semibold text-neutral-900">
-              {formatCurrency(method === 'equal' ? chargesSummary.net : computeNetTotal({
-                method,
-                total: method === 'equal' ? totalValue : undefined,
-                items,
-                serviceChargePct,
-                taxPct,
-                tip: tipValue,
-                discount: discountValue,
-              }).net)}
-            </span>
+            <span className="text-lg font-semibold text-neutral-900">{formatCurrency(previewNet)}</span>
           </div>
           <div className="grid gap-2 sm:grid-cols-3">
             <Button type="button" variant="secondary" onClick={handleSaveDraft}>
@@ -669,19 +672,7 @@ export function BillForm({ users = MOCK_USERS }: BillFormProps) {
           <div className="mx-auto flex w-full max-w-5xl items-center gap-4 px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom,0))]">
             <div className="flex flex-col text-sm">
               <span className="text-neutral-500">Net total</span>
-              <span className="text-base font-semibold text-neutral-900">
-                {formatCurrency(
-                  computeNetTotal({
-                    method,
-                    total: method === 'equal' ? totalValue : undefined,
-                    items,
-                    serviceChargePct,
-                    taxPct,
-                    tip: tipValue,
-                    discount: discountValue,
-                  }).net
-                )}
-              </span>
+              <span className="text-base font-semibold text-neutral-900">{formatCurrency(previewNet)}</span>
             </div>
             <Button type="submit" className="flex-1" disabled={!formState.isValid || isSubmitting}>
               {isSubmitting ? (

@@ -1,10 +1,9 @@
+// file: app/layout.tsx
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
-import { Toaster } from 'sonner'
-import { AuthProvider } from '@/lib/auth-context'
 
-const inter = Inter({ subsets: ['latin'] })
+import { AuthProvider } from '@/lib/auth-context'
+import { ToasterClient } from '@/components/ui/toaster-client'
 
 export const metadata: Metadata = {
   title: 'DuitLater - Bayar Nanti, Track Sekarang',
@@ -35,18 +34,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className={inter.className}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
-        <Toaster position="top-center" richColors />
+      <body className="h-full bg-gray-50 font-sans text-gray-900 antialiased">
+        <AuthProvider>{children}</AuthProvider>
+        <ToasterClient />
       </body>
     </html>
   )

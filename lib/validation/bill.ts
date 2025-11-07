@@ -13,14 +13,17 @@ export const toOptionalNumber = (value: unknown) => {
   return Number.isNaN(parsed) ? undefined : parsed
 }
 
-const baseMoneySchema = z
-  .number({ invalid_type_error: 'Invalid amount' })
-  .min(0, 'Must be at least 0')
-  .max(9999999, 'Too large')
-  .refine(decimalCheck, 'Max 2 decimal places')
+const moneySchema = (min: number, minMessage: string, max: number) =>
+  z
+    .number({ invalid_type_error: 'Invalid amount' })
+    .min(min, minMessage)
+    .max(max, 'Too large')
+    .refine(decimalCheck, 'Max 2 decimal places')
+
+const baseMoneySchema = moneySchema(0, 'Must be at least 0', 9_999_999)
 
 const optionalMoneySchema = z
-  .preprocess(toOptionalNumber, baseMoneySchema.max(99999, 'Too large'))
+  .preprocess(toOptionalNumber, moneySchema(0, 'Must be at least 0', 99_999))
   .optional()
 
 const percentageSchema = z
@@ -40,7 +43,9 @@ export const billFormSchema = z
     merchant: z.string().optional(),
     notes: z.string().optional(),
     currency: z.literal('MYR'),
-    total: z.preprocess(toOptionalNumber, baseMoneySchema.min(0.01, 'Enter a positive amount')).optional(),
+    total: z
+      .preprocess(toOptionalNumber, moneySchema(0.01, 'Enter a positive amount', 9_999_999))
+      .optional(),
     method: z.enum(['equal', 'itemized']),
     payerId: z.string(),
     participantIds: z.array(z.string()).min(1, 'Select participants'),
