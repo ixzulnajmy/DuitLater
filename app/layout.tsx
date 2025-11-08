@@ -1,10 +1,7 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
 import { Providers } from '@/components/providers/providers'
 import { cn } from '@/lib/utils'
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' })
 
 export const metadata: Metadata = {
   title: 'DuitLater — Split bills easily, settle later',
@@ -35,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('min-h-screen bg-background font-sans antialiased', inter.variable)}>
+      <body className={cn('min-h-screen bg-background font-sans antialiased')}>
         <Providers>{children}</Providers>
       </body>
     </html>
