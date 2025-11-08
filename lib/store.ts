@@ -8,21 +8,39 @@ interface AuthState {
   clearUser: () => void
 }
 
+type ToastType = 'success' | 'error' | 'info'
+
 interface UIState {
   isLoading: boolean
-  setLoading: (loading: boolean) => void
+  activeBillFilter: 'all' | 'pending' | 'settled'
+  settleBillId: string | null
+  isConfettiActive: boolean
+  showPullHint: boolean
   toast: {
     message: string
-    type: 'success' | 'error' | 'info'
+    type: ToastType
   } | null
-  showToast: (message: string, type: 'success' | 'error' | 'info') => void
+  setLoading: (loading: boolean) => void
+  setActiveBillFilter: (filter: 'all' | 'pending' | 'settled') => void
+  openSettleModal: (billId: string) => void
+  closeSettleModal: () => void
+  triggerConfetti: () => void
+  clearConfetti: () => void
+  setShowPullHint: (value: boolean) => void
+  showToast: (message: string, type: ToastType) => void
   clearToast: () => void
 }
 
 interface BillState {
-  currentBill: any | null
-  setCurrentBill: (bill: any) => void
-  clearCurrentBill: () => void
+  draft: {
+    title: string
+    amount: number
+    category: string | null
+    payerId: string | null
+    participantIds: string[]
+  }
+  updateDraft: (values: Partial<BillState['draft']>) => void
+  resetDraft: () => void
 }
 
 // Auth Store
@@ -45,8 +63,18 @@ export const useAuthStore = create<AuthState>()(
 export const useUIStore = create<UIState>()(
   devtools((set) => ({
     isLoading: false,
-    setLoading: (loading) => set({ isLoading: loading }),
+    activeBillFilter: 'all',
+    settleBillId: null,
+    isConfettiActive: false,
+    showPullHint: true,
     toast: null,
+    setLoading: (loading) => set({ isLoading: loading }),
+    setActiveBillFilter: (filter) => set({ activeBillFilter: filter }),
+    openSettleModal: (billId) => set({ settleBillId: billId }),
+    closeSettleModal: () => set({ settleBillId: null }),
+    triggerConfetti: () => set({ isConfettiActive: true }),
+    clearConfetti: () => set({ isConfettiActive: false }),
+    setShowPullHint: (value) => set({ showPullHint: value }),
     showToast: (message, type) => set({ toast: { message, type } }),
     clearToast: () => set({ toast: null }),
   }))
@@ -57,9 +85,30 @@ export const useBillStore = create<BillState>()(
   devtools(
     persist(
       (set) => ({
-        currentBill: null,
-        setCurrentBill: (bill) => set({ currentBill: bill }),
-        clearCurrentBill: () => set({ currentBill: null }),
+        draft: {
+          title: '',
+          amount: 0,
+          category: null,
+          payerId: null,
+          participantIds: [],
+        },
+        updateDraft: (values) =>
+          set((state) => ({
+            draft: {
+              ...state.draft,
+              ...values,
+            },
+          })),
+        resetDraft: () =>
+          set({
+            draft: {
+              title: '',
+              amount: 0,
+              category: null,
+              payerId: null,
+              participantIds: [],
+            },
+          }),
       }),
       {
         name: 'bill-draft-storage',
