@@ -1,5 +1,6 @@
+'use client'
+
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
 import type { User } from './types'
 
 interface AuthState {
@@ -44,75 +45,55 @@ interface BillState {
 }
 
 // Auth Store
-export const useAuthStore = create<AuthState>()(
-  devtools(
-    persist(
-      (set) => ({
-        user: null,
-        setUser: (user) => set({ user }),
-        clearUser: () => set({ user: null }),
-      }),
-      {
-        name: 'auth-storage',
-      }
-    )
-  )
-)
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  setUser: (user) => set({ user }),
+  clearUser: () => set({ user: null }),
+}))
 
 // UI Store
-export const useUIStore = create<UIState>()(
-  devtools((set) => ({
-    isLoading: false,
-    activeBillFilter: 'all',
-    settleBillId: null,
-    isConfettiActive: false,
-    showPullHint: true,
-    toast: null,
-    setLoading: (loading) => set({ isLoading: loading }),
-    setActiveBillFilter: (filter) => set({ activeBillFilter: filter }),
-    openSettleModal: (billId) => set({ settleBillId: billId }),
-    closeSettleModal: () => set({ settleBillId: null }),
-    triggerConfetti: () => set({ isConfettiActive: true }),
-    clearConfetti: () => set({ isConfettiActive: false }),
-    setShowPullHint: (value) => set({ showPullHint: value }),
-    showToast: (message, type) => set({ toast: { message, type } }),
-    clearToast: () => set({ toast: null }),
-  }))
-)
+export const useUIStore = create<UIState>((set) => ({
+  isLoading: false,
+  activeBillFilter: 'all',
+  settleBillId: null,
+  isConfettiActive: false,
+  showPullHint: true,
+  toast: null,
+  setLoading: (loading) => set({ isLoading: loading }),
+  setActiveBillFilter: (filter) => set({ activeBillFilter: filter }),
+  openSettleModal: (billId) => set({ settleBillId: billId }),
+  closeSettleModal: () => set({ settleBillId: null }),
+  triggerConfetti: () => set({ isConfettiActive: true }),
+  clearConfetti: () => set({ isConfettiActive: false }),
+  setShowPullHint: (value) => set({ showPullHint: value }),
+  showToast: (message, type) => set({ toast: { message, type } }),
+  clearToast: () => set({ toast: null }),
+}))
 
 // Bill Store (for temporary bill creation state)
-export const useBillStore = create<BillState>()(
-  devtools(
-    persist(
-      (set) => ({
-        draft: {
-          title: '',
-          amount: 0,
-          category: null,
-          payerId: null,
-          participantIds: [],
-        },
-        updateDraft: (values) =>
-          set((state) => ({
-            draft: {
-              ...state.draft,
-              ...values,
-            },
-          })),
-        resetDraft: () =>
-          set({
-            draft: {
-              title: '',
-              amount: 0,
-              category: null,
-              payerId: null,
-              participantIds: [],
-            },
-          }),
-      }),
-      {
-        name: 'bill-draft-storage',
-      }
-    )
-  )
-)
+export const useBillStore = create<BillState>((set) => ({
+  draft: {
+    title: '',
+    amount: 0,
+    category: null,
+    payerId: null,
+    participantIds: [],
+  },
+  updateDraft: (values) =>
+    set((state) => ({
+      draft: {
+        ...state.draft,
+        ...values,
+      },
+    })),
+  resetDraft: () =>
+    set({
+      draft: {
+        title: '',
+        amount: 0,
+        category: null,
+        payerId: null,
+        participantIds: [],
+      },
+    }),
+}))
