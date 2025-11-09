@@ -1,19 +1,16 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
-import { Toaster } from 'sonner'
-import { AuthProvider } from '@/lib/auth-context'
-
-const inter = Inter({ subsets: ['latin'] })
+import { Providers } from '@/components/providers/providers'
+import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
-  title: 'DuitLater - Bayar Nanti, Track Sekarang',
-  description: 'Split bills with friends, scan receipts, and settle up without the headache. Bayar nanti, track sekarang! 💰',
+  title: 'DuitLater — Split bills easily, settle later',
+  description: 'Pixel-perfect Malaysian bill splitting experience. Split bills easily, settle later — the Malaysian way 💸',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
     title: 'DuitLater',
+    statusBarStyle: 'default',
   },
   icons: {
     icon: '/icon-192x192.png',
@@ -25,8 +22,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false,
-  themeColor: '#f59e0b',
+  themeColor: '#34D399',
 }
 
 export default function RootLayout({
@@ -35,18 +31,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      </head>
-      <body className={inter.className}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
-        <Toaster position="top-center" richColors />
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn('min-h-screen bg-background font-sans antialiased')}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
