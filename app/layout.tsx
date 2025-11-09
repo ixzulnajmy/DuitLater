@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/components/theme-provider'
-import CompactFloatingNav from '@/components/navigation/CompactFloatingNav'
+import NavigationWrapper from '@/components/navigation/NavigationWrapper'
 
 export const metadata: Metadata = {
   title: 'DuitLater - Bayar Nanti, Track Sekarang',
@@ -52,7 +52,7 @@ export default function RootLayout({
             {children}
           </AuthProvider>
           <Toaster position="top-center" richColors />
-          <CompactFloatingNav />
+          <NavigationWrapper />
         </ThemeProvider>
       </body>
     </html>
