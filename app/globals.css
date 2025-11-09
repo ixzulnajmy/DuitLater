@@ -3,46 +3,98 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply border-gray-200;
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 160 84% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 0 72% 71%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 160 84% 52%;
+    --radius: 1rem;
   }
-  
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 160 84% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 0 72% 71%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 160 84% 52%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-background text-foreground;
   }
 }
 
 @layer components {
   /* Custom button styles */
   .btn-primary {
-    @apply bg-amber-500 text-white px-4 py-2 rounded-lg font-medium 
-           hover:bg-amber-600 active:bg-amber-700 
-           transition-colors duration-150;
+    @apply bg-primary text-white px-4 py-3 rounded-2xl font-medium
+           hover:opacity-90 active:scale-95
+           transition-all duration-150 shadow-sm;
   }
-  
+
   .btn-secondary {
-    @apply bg-white text-gray-700 px-4 py-2 rounded-lg font-medium 
-           border border-gray-300 hover:bg-gray-50 active:bg-gray-100
-           transition-colors duration-150;
+    @apply bg-secondary text-secondary-foreground px-4 py-3 rounded-2xl font-medium
+           border border-border hover:bg-muted active:scale-95
+           transition-all duration-150;
   }
-  
+
+  .btn-ghost {
+    @apply bg-transparent text-foreground px-4 py-3 rounded-2xl font-medium
+           hover:bg-muted active:scale-95
+           transition-all duration-150;
+  }
+
   /* Card styles */
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4;
+    @apply bg-card rounded-2xl shadow-sm border border-border p-4;
   }
-  
+
   /* Input styles */
   .input {
-    @apply w-full px-4 py-2 rounded-lg border border-gray-300 
-           focus:ring-2 focus:ring-amber-500 focus:border-transparent
+    @apply w-full px-4 py-3 rounded-2xl border border-input
+           bg-background text-foreground
+           focus:ring-2 focus:ring-ring focus:border-transparent
            transition-all duration-150;
   }
 }
 
 /* Loading spinner */
 .spinner {
-  border: 3px solid rgba(245, 158, 11, 0.1);
-  border-top-color: #f59e0b;
+  border: 3px solid rgba(52, 211, 153, 0.1);
+  border-top-color: #34D399;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -57,9 +109,9 @@
 
 /* Floating action button */
 .fab {
-  @apply fixed bottom-6 right-6 w-16 h-16 rounded-full 
-         bg-amber-500 text-white shadow-lg
+  @apply fixed bottom-6 right-6 w-16 h-16 rounded-full
+         bg-primary text-white shadow-lg
          flex items-center justify-center
-         hover:bg-amber-600 active:scale-95
+         hover:opacity-90 active:scale-95
          transition-all duration-150 z-50;
 }
