@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { BottomNav } from "@/components/bottom-nav"
 import { Card } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { AvatarEmoji } from "@/components/avatar-emoji"
@@ -163,8 +162,6 @@ export default function ProfilePage() {
           Made with 💚 in Malaysia
         </div>
       </div>
-
-      <BottomNav />
     </div>
   )
 }

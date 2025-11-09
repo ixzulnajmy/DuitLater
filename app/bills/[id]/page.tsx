@@ -1,7 +1,6 @@
 "use client"
 
 import { Header } from "@/components/header"
-import { BottomNav } from "@/components/bottom-nav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -167,8 +166,6 @@ export default function BillDetailsPage() {
           </Button>
         )}
       </div>
-
-      <BottomNav />
     </div>
   )
 }

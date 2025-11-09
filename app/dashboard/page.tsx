@@ -4,10 +4,8 @@ import { useState } from "react"
 import { BalanceCard } from "@/components/balance-card"
 import { BillCard } from "@/components/bill-card"
 import { FriendRow } from "@/components/friend-row"
-import { BottomNav } from "@/components/bottom-nav"
 import { Button } from "@/components/ui/button"
 import { mockBills, mockFriends, type Friend } from "@/lib/mock-data"
-import { Plus } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 import confetti from "canvas-confetti"
@@ -141,14 +139,6 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
-
-      {/* FAB */}
-      <Link href="/add-bill" className="fab">
-        <Plus size={28} strokeWidth={2.5} />
-      </Link>
-
-      {/* Bottom Navigation */}
-      <BottomNav />
     </div>
   )
 }

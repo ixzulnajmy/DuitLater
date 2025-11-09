@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Header } from "@/components/header"
-import { BottomNav } from "@/components/bottom-nav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -182,8 +181,6 @@ export default function AddBillPage() {
           Add Bill
         </Button>
       </form>
-
-      <BottomNav />
     </div>
   )
 }
