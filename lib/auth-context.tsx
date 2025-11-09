@@ -20,9 +20,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+
+  // Only create client if env vars are present (to support static build)
+  const hasSupabaseConfig = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabase = hasSupabaseConfig ? createClient() : null
 
   useEffect(() => {
+    if (!supabase) {
+      // In demo mode without Supabase
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSupabaseUser(session?.user ?? null)
@@ -50,6 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   async function fetchUserProfile(userId: string) {
+    if (!supabase) return
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -67,6 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signIn(email: string, password: string) {
+    if (!supabase) throw new Error('Supabase not configured')
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -75,6 +88,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signUp(email: string, password: string, fullName: string) {
+    if (!supabase) throw new Error('Supabase not configured')
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -88,6 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
+    if (!supabase) throw new Error('Supabase not configured')
+
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }

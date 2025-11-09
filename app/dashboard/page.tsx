@@ -1,260 +1,154 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { useAuthStore } from '@/lib/store'
-import type { Bill, Settlement } from '@/lib/types'
-import { Plus, LogOut, Users } from 'lucide-react'
-import Link from 'next/link'
-import { toast } from 'sonner'
+import { useState } from "react"
+import { BalanceCard } from "@/components/balance-card"
+import { BillCard } from "@/components/bill-card"
+import { FriendRow } from "@/components/friend-row"
+import { BottomNav } from "@/components/bottom-nav"
+import { Button } from "@/components/ui/button"
+import { mockBills, mockFriends, type Friend } from "@/lib/mock-data"
+import { Plus } from "lucide-react"
+import Link from "next/link"
+import { toast } from "sonner"
+import confetti from "canvas-confetti"
 
 export default function DashboardPage() {
-  const { user, clearUser } = useAuthStore()
-  const router = useRouter()
-  const [bills, setBills] = useState<Bill[]>([])
-  const [settlements, setSettlements] = useState<Settlement[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const [friends, setFriends] = useState<Friend[]>(mockFriends)
 
-  // Calculate balances
-  const totalOwed = settlements
-    .filter((s) => s.from_user_id === user?.id && s.status === 'pending')
-    .reduce((sum, s) => sum + s.amount, 0)
+  // Calculate total balance
+  const totalBalance = friends.reduce((sum, friend) => sum + friend.balance, 0)
 
-  const totalOwedToMe = settlements
-    .filter((s) => s.to_user_id === user?.id && s.status === 'pending')
-    .reduce((sum, s) => sum + s.amount, 0)
+  // Get outstanding friends (who owe or are owed)
+  const outstandingFriends = friends.filter(f => f.balance !== 0)
 
-  const netBalance = totalOwedToMe - totalOwed
+  // Get recent pending bills
+  const recentBills = mockBills
+    .filter(b => b.status === 'pending')
+    .slice(0, 5)
 
-  useEffect(() => {
-    checkAuth()
-  }, [])
+  const handleSettle = (friendId: string) => {
+    const friend = friends.find(f => f.id === friendId)
+    if (!friend) return
 
-  useEffect(() => {
-    if (user) {
-      fetchData()
-    }
-  }, [user])
+    const isPositive = friend.balance > 0
+    const amount = Math.abs(friend.balance)
 
-  async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession()
-    
-    if (!session) {
-      router.push('/auth')
-      return
-    }
+    // Update friend balance to 0
+    setFriends(prev => prev.map(f =>
+      f.id === friendId ? { ...f, balance: 0 } : f
+    ))
 
-    if (!user) {
-      // Fetch user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single()
-
-      if (profile) {
-        useAuthStore.getState().setUser(profile)
-      }
-    }
-  }
-
-  async function fetchData() {
-    try {
-      // Fetch bills where user is a participant
-      const { data: billsData, error: billsError } = await supabase
-        .from('bills')
-        .select(`
-          *,
-          payer:profiles!bills_paid_by_fkey(full_name, email)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (billsError) throw billsError
-
-      // Fetch settlements
-      const { data: settlementsData, error: settlementsError } = await supabase
-        .from('settlements')
-        .select(`
-          *,
-          from_user:profiles!settlements_from_user_id_fkey(full_name, email),
-          to_user:profiles!settlements_to_user_id_fkey(full_name, email),
-          bill:bills(title)
-        `)
-        .or(`from_user_id.eq.${user?.id},to_user_id.eq.${user?.id}`)
-
-      if (settlementsError) throw settlementsError
-
-      setBills(billsData || [])
-      setSettlements(settlementsData || [])
-    } catch (error: any) {
-      toast.error('Failed to load data')
-      console.error('Error fetching data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    clearUser()
-    toast.success('Signed out successfully')
-    router.push('/')
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="spinner"></div>
-      </div>
+    // Show success message
+    toast.success(
+      isPositive
+        ? `${friend.name} settled RM ${amount.toFixed(2)}! 🎉`
+        : `You settled RM ${amount.toFixed(2)} with ${friend.name}! 💚`
     )
+
+    // Check if all debts are settled
+    const allSettled = friends.every(f => f.balance === 0 || f.id === friendId)
+    if (allSettled) {
+      // Fire confetti!
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      })
+      toast.success("All debts settled! You're awesome! 🎉")
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen pb-20">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        <div className="container px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">💰</span>
-              <h1 className="text-2xl font-bold text-amber-600">DuitLater</h1>
+              <span className="text-3xl">💸</span>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                DuitLater
+              </h1>
             </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/friends"
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <Users size={24} className="text-gray-600" />
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <LogOut size={24} className="text-gray-600" />
-              </button>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              👋 Hey there!
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Balance Summary */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="card mb-6">
-          <h2 className="text-lg font-semibold mb-4">Your Balance</h2>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">You owe</p>
-              <p className="text-2xl font-bold text-red-600">
-                ${totalOwed.toFixed(2)}
-              </p>
+      <div className="container px-4 py-6 space-y-6">
+        {/* Balance Card */}
+        <BalanceCard balance={totalBalance} />
+
+        {/* Outstanding Section */}
+        {outstandingFriends.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Outstanding</h2>
+              <Link href="/friends">
+                <Button variant="ghost" size="sm">
+                  View All
+                </Button>
+              </Link>
             </div>
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Owed to you</p>
-              <p className="text-2xl font-bold text-green-600">
-                ${totalOwedToMe.toFixed(2)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Net</p>
-              <p
-                className={`text-2xl font-bold ${
-                  netBalance >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}
-              >
-                ${Math.abs(netBalance).toFixed(2)}
-              </p>
+            <div className="space-y-2">
+              {outstandingFriends.slice(0, 3).map((friend) => (
+                <FriendRow
+                  key={friend.id}
+                  friend={friend}
+                  onSettle={handleSettle}
+                />
+              ))}
             </div>
           </div>
-        </div>
+        )}
+
+        {outstandingFriends.length === 0 && (
+          <div className="rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-8 text-center">
+            <p className="text-4xl mb-3">🎉</p>
+            <p className="font-semibold mb-1">All Settled!</p>
+            <p className="text-sm text-muted-foreground">
+              No outstanding balances. You&apos;re doing great!
+            </p>
+          </div>
+        )}
 
         {/* Recent Bills */}
-        <div>
-          <h2 className="text-xl font-bold mb-4">Recent Bills</h2>
-          {bills.length === 0 ? (
-            <div className="card text-center py-12">
-              <p className="text-gray-500 mb-4">No bills yet!</p>
-              <p className="text-sm text-gray-400">
-                Tap the + button below to add your first bill
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Recent Bills</h2>
+            <Link href="/bills">
+              <Button variant="ghost" size="sm">
+                View All
+              </Button>
+            </Link>
+          </div>
+          {recentBills.length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-border bg-muted/50 p-8 text-center">
+              <p className="text-4xl mb-3">📝</p>
+              <p className="font-semibold mb-1">No bills yet</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Tap the + button to add your first bill
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {bills.map((bill: any) => (
-                <Link href={`/bills/${bill.id}`} key={bill.id}>
-                  <div className="card hover:shadow-md transition-shadow cursor-pointer">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg">{bill.title}</h3>
-                        <p className="text-sm text-gray-500">
-                          Paid by {bill.payer?.full_name || 'Unknown'}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {new Date(bill.bill_date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-gray-900">
-                          ${bill.total_amount.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+            <div className="space-y-2">
+              {recentBills.map((bill) => (
+                <BillCard key={bill.id} bill={bill} />
               ))}
             </div>
           )}
         </div>
-
-        {/* Pending Settlements */}
-        {settlements.filter((s: any) => s.status === 'pending').length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4">Pending Settlements</h2>
-            <div className="space-y-3">
-              {settlements
-                .filter((s: any) => s.status === 'pending')
-                .map((settlement: any) => (
-                  <div key={settlement.id} className="card">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        {settlement.from_user_id === user?.id ? (
-                          <p className="font-medium">
-                            You owe {settlement.to_user?.full_name}
-                          </p>
-                        ) : (
-                          <p className="font-medium">
-                            {settlement.from_user?.full_name} owes you
-                          </p>
-                        )}
-                        <p className="text-sm text-gray-500">
-                          {settlement.bill?.title}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p
-                          className={`text-xl font-bold ${
-                            settlement.from_user_id === user?.id
-                              ? 'text-red-600'
-                              : 'text-green-600'
-                          }`}
-                        >
-                          ${settlement.amount.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Giant + Button (FAB) */}
-      <Link href="/bills/new" className="fab">
-        <Plus size={32} />
+      {/* FAB */}
+      <Link href="/add-bill" className="fab">
+        <Plus size={28} strokeWidth={2.5} />
       </Link>
+
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   )
 }

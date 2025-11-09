@@ -1,10 +1,8 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/lib/auth-context'
-
-const inter = Inter({ subsets: ['latin'] })
+import { ThemeProvider } from '@/components/theme-provider'
 
 export const metadata: Metadata = {
   title: 'DuitLater - Bayar Nanti, Track Sekarang',
@@ -26,7 +24,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#f59e0b',
+  themeColor: '#34D399',
 }
 
 export default function RootLayout({
@@ -35,18 +33,25 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className={inter.className}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
-        <Toaster position="top-center" richColors />
+      <body className="font-sans">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+          <Toaster position="top-center" richColors />
+        </ThemeProvider>
       </body>
     </html>
   )
