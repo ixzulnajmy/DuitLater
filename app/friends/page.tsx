@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { BottomNav } from "@/components/bottom-nav"
 import { FriendRow } from "@/components/friend-row"
 import { Input } from "@/components/ui/input"
 import { mockFriends, type Friend } from "@/lib/mock-data"
@@ -123,8 +122,6 @@ export default function FriendsPage() {
           </div>
         )}
       </div>
-
-      <BottomNav />
     </div>
   )
 }

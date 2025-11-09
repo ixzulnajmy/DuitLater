@@ -1,6 +1,5 @@
 "use client"
 
-import { BottomNav } from "@/components/bottom-nav"
 import { AvatarEmoji } from "@/components/avatar-emoji"
 import { mockActivities, mockFriends } from "@/lib/mock-data"
 import { formatDistanceToNow } from "date-fns"
@@ -104,8 +103,6 @@ export default function ActivityPage() {
           </div>
         )}
       </div>
-
-      <BottomNav />
     </div>
   )
 }

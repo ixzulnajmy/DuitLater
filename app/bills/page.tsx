@@ -1,12 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { BottomNav } from "@/components/bottom-nav"
 import { BillCard } from "@/components/bill-card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { mockBills } from "@/lib/mock-data"
-import { Plus } from "lucide-react"
-import Link from "next/link"
 
 export default function BillsPage() {
   const [activeTab, setActiveTab] = useState<"all" | "pending" | "settled">("all")
@@ -89,14 +86,6 @@ export default function BillsPage() {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* FAB */}
-      <Link href="/add-bill" className="fab">
-        <Plus size={28} strokeWidth={2.5} />
-      </Link>
-
-      {/* Bottom Navigation */}
-      <BottomNav />
     </div>
   )
 }

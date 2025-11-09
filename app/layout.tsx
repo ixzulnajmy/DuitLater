@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/components/theme-provider'
+import CompactFloatingNav from '@/components/navigation/CompactFloatingNav'
 
 export const metadata: Metadata = {
   title: 'DuitLater - Bayar Nanti, Track Sekarang',
@@ -40,7 +41,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className="font-sans">
+      <body className="font-sans pb-24">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -51,6 +52,7 @@ export default function RootLayout({
             {children}
           </AuthProvider>
           <Toaster position="top-center" richColors />
+          <CompactFloatingNav />
         </ThemeProvider>
       </body>
     </html>
