@@ -40,12 +40,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme])
 
   useEffect(() => {
-    const handler = (event: MediaQueryListEvent) => {
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)')
+    if (!media) return undefined
+
+    const listener = (event: MediaQueryListEvent) => {
       setThemeState(event.matches ? 'dark' : 'light')
     }
-    const media = window.matchMedia?.('(prefers-color-scheme: dark)')
-    media?.addEventListener('change', handler)
-    return () => media?.removeEventListener('change', handler)
+
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', listener)
+      return () => media.removeEventListener?.('change', listener)
+    }
+
+    if (typeof media.addListener === 'function') {
+      media.addListener(listener)
+      return () => media.removeListener?.(listener)
+    }
+
+    return undefined
   }, [])
 
   const value = useMemo(
