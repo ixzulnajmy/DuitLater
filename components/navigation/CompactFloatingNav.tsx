@@ -35,14 +35,14 @@ export default function CompactFloatingNav() {
   };
 
   return (
-    <>
-      {/* Main Floating Nav Bar - Compact Style */}
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50"
-      >
+    <motion.div
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-6"
+    >
+      <div className="flex items-center gap-3">
+        {/* Main pill navigation */}
         <motion.div
           className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl shadow-black/10 dark:shadow-black/40"
           whileHover={{ y: -2 }}
@@ -64,7 +64,7 @@ export default function CompactFloatingNav() {
                 {isActive && (
                   <motion.div
                     layoutId="activePill"
-                    className="absolute inset-0 bg-emerald-500 rounded-full"
+                    className="absolute inset-0 bg-primary rounded-full"
                     transition={{
                       type: "spring",
                       stiffness: 380,
@@ -83,44 +83,44 @@ export default function CompactFloatingNav() {
             );
           })}
         </motion.div>
-      </motion.div>
 
-      {/* Floating Action Button - Mint Green Style */}
-      <motion.button
-        onClick={handleFABClick}
-        initial={{ scale: 0, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 20,
-          delay: 0.1,
-        }}
-        whileHover={{ scale: 1.15, y: -4 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-4 right-5 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-2xl shadow-emerald-500/50 flex items-center justify-center group"
-      >
-        {/* Plus Icon */}
-        <motion.div
-          animate={{ rotate: 0 }}
-          whileHover={{ rotate: 90 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-        >
-          <Plus className="w-6 h-6" strokeWidth={2.5} />
-        </motion.div>
-
-        {/* Pulse animation ring */}
-        <motion.div
-          className="absolute inset-0 rounded-full bg-emerald-500"
-          initial={{ scale: 1, opacity: 0.5 }}
-          animate={{ scale: 1.5, opacity: 0 }}
+        {/* Floating Action Button - iOS Blue Style */}
+        <motion.button
+          onClick={handleFABClick}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
           transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "loop",
+            type: "spring",
+            stiffness: 300,
+            damping: 20,
+            delay: 0.1,
           }}
-        />
-      </motion.button>
-    </>
+          whileHover={{ scale: 1.15, y: -4 }}
+          whileTap={{ scale: 0.9 }}
+          className="w-14 h-14 rounded-full bg-gradient-to-br from-primary via-primary-600 to-primary-700 text-white shadow-2xl shadow-primary/50 flex items-center justify-center group relative"
+        >
+          {/* Plus Icon */}
+          <motion.div
+            animate={{ rotate: 0 }}
+            whileHover={{ rotate: 90 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          >
+            <Plus className="w-6 h-6" strokeWidth={2.5} />
+          </motion.div>
+
+          {/* Pulse animation ring */}
+          <motion.div
+            className="absolute inset-0 rounded-full bg-primary"
+            initial={{ scale: 1, opacity: 0.5 }}
+            animate={{ scale: 1.5, opacity: 0 }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "loop",
+            }}
+          />
+        </motion.button>
+      </div>
+    </motion.div>
   );
 }

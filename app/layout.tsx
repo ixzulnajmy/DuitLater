@@ -25,7 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#34D399',
+  themeColor: '#007AFF',
 }
 
 export default function RootLayout({
@@ -44,7 +44,7 @@ export default function RootLayout({
       <body className="font-sans pb-24">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
